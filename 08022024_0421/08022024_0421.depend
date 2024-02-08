@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1707421460 source:c:\users\asus\documents\cpp\08022024_0421\main.cpp
+	<iostream>
+	<vector>
+	<algorithm>
+	<string>
+	<map>
+
