@@ -8,6 +8,12 @@ using namespace std;
 
 class Person {
 public:
+    Person (const string& name, const string& surename, const int& birth_year) {
+        burn_year = birth_year;
+        ChangeFirstName(burn_year, name);
+        ChangeLastName(burn_year, surename);
+    }
+
     void ChangeFirstName (const int& inp_year, const string& inp_first_name) {
         if (save_first_name != inp_first_name) {
             first_name[inp_year] = inp_first_name;
@@ -22,10 +28,15 @@ public:
         }
     }
 
-    string GetFullName (const int& inp_year) {
+    string GetFullName (const int& inp_year) const{
+        string result;
+        if (inp_year < burn_year) {
+            result = "No person";
+            return result;
+        }
+
         string f_name = GetNameByYear(inp_year, first_name);
         string l_name = GetNameByYear(inp_year, last_name);
-        string result;
         if ((l_name == "") && (f_name == "")) {
             result = "Incognito";
             return result;
@@ -42,19 +53,23 @@ public:
         return result;
     }
 
-    string GetFullNameWithHistory (const int& inp_year) {
-        map <int, string> my_first_name = first_name, my_last_name = last_name;
-        RemakeNameList(my_first_name);
-        RemakeNameList(my_last_name);
-        string f_name = GetNameByYear(inp_year, my_first_name);
-        string f_name_history = GetNameHistoryByYear(inp_year, my_first_name);
-        string l_name = GetNameByYear(inp_year, my_last_name);
-        string l_name_history = GetNameHistoryByYear(inp_year, my_last_name);
+    string GetFullNameWithHistory (const int& inp_year) const{
         string result;
+        if (inp_year < burn_year) {
+            result = "No person";
+            return result;
+        }
+
+        string f_name = GetNameByYear(inp_year, first_name);
+        string f_name_history = GetNameHistoryByYear(inp_year, first_name);
+        string l_name = GetNameByYear(inp_year, last_name);
+        string l_name_history = GetNameHistoryByYear(inp_year, last_name);
+
         if ((l_name == "") && (f_name == "")) {
             result = "Incognito";
             return result;
         }
+
         if (l_name == "") {
             if (f_name != f_name_history) {
                 if (f_name_history != "") {
@@ -66,6 +81,7 @@ public:
             result = f_name + f_name_history + " with unknown last name";
             return result;
         }
+
         if (f_name == "") {
             if (l_name != l_name_history) {
                 if (l_name_history != "") {
@@ -77,6 +93,7 @@ public:
             result = l_name + l_name_history + " with unknown first name";
             return result;
         }
+
         if (f_name != f_name_history) {
             if (f_name_history != "") {
                 f_name_history = " (" + f_name_history + ")";
@@ -84,6 +101,7 @@ public:
         } else {
             f_name_history = "";
         }
+
         if (l_name != l_name_history) {
             if (l_name_history != "") {
                 l_name_history = " (" + l_name_history + ")";
@@ -91,14 +109,16 @@ public:
         } else {
             l_name_history = "";
         }
+
         result = f_name + f_name_history + " " + l_name + l_name_history;
         return result;
     }
 private:
     map <int, string> first_name, last_name;
+    int burn_year;
     string save_first_name, save_last_name;
 
-    string GetNameByYear (const int& inp_year, const map <int, string>& name_list) {
+    string GetNameByYear (const int& inp_year, const map <int, string>& name_list) const{
         string name = "";
         for (const auto &pair : name_list) {
             if (pair.first <= inp_year) {
@@ -110,31 +130,37 @@ private:
         return name;
     }
 
-    void RemakeNameList (map <int, string>& name_list) {
-        vector <int> years(name_list.size()), delete_years;
+    string GetNameHistoryByYear (const int& inp_year, const map <int, string>& name_list) const{
+        map <int, string> my_name = name_list;
+        vector <int> years(my_name.size()), delete_years;
         size_t counter = 0;
-        for (auto &pair : name_list) {
+        string name = "";
+
+        for (const auto pair : name_list) {
+            my_name[pair.first] = pair.second;
+        }
+
+        for (auto &pair : my_name) {
             years[counter] = pair.first;
             ++ counter;
         }
+
         if (counter > 1) {
             for (counter = 0; counter < years.size(); ++ counter) {
-                if (name_list[years[counter]] == name_list[years[counter + 1]]) {
+                if (my_name[years[counter]] == my_name[years[counter + 1]]) {
                     delete_years.push_back(years[counter + 1]);
                 }
             }
             if (not delete_years.empty()) {
                 for (const auto& y : delete_years) {
-                    name_list.erase(y);
+                    my_name.erase(y);
                 }
             }
         }
-    }
 
-    string GetNameHistoryByYear (const int& inp_year, const map <int, string>& name_list) {
-        string name = "";
-        int counter = 0;
-        for (const auto &pair : name_list) {
+        counter = 0;
+
+        for (const auto &pair : my_name) {
             if (pair.first <= inp_year) {
                 if (name == "") {
                     name = pair.second;
@@ -146,43 +172,34 @@ private:
                 break;
             }
         }
+
         if ((counter == 1) || (name == "")) {
             name = "";
             return name;
         }
-        else {
-            size_t last_string_end = name.find(", ");
-            if (last_string_end != string::npos) {
-                name = name.substr(last_string_end + 2, name.size() - 1);
-            }
+
+        size_t last_string_end = name.find(", ");
+        if (last_string_end != string::npos) {
+            name = name.substr(last_string_end + 2, name.size() - 1);
         }
         return name;
     }
 };
 
 int main() {
-    Person person;
+    Person person("-1_first", "-1_last", -1);
+    int year = 3;
+    person.ChangeLastName(year, std::to_string(year) + "_last");
 
-    person.ChangeFirstName(1966, "Aglaya");
+    year = 5;
+    person.ChangeFirstName(year, std::to_string(year) + "_first");
+    person.ChangeLastName(year, std::to_string(year) + "_last");
 
-    person.ChangeFirstName(1962, "Polina0");
-
-    person.ChangeFirstName(1963, "Polina1");
-
-    person.ChangeFirstName(1964, "Polina2");
-
-    person.ChangeFirstName(1964, "Polina1");
-
-    person.ChangeLastName(1963, "Sergeeva");
-
-    person.ChangeLastName(1963, "Sergeeva1");
-
-    for (int year : { 1900, 1965, 1990 }) {
-
-        cout << person.GetFullNameWithHistory(year) << endl;
-
-    }
+    year = 1;
+    person.ChangeLastName(year, std::to_string(3) + "_last");
+    for (int a : {-2, -1, 1})cout << person.GetFullName(a) << '\n';
+    for (int a : {-2, -1, 1})cout << person.GetFullNameWithHistory(a) << '\n';
 
 
-  return 0;
+    return 0;
 }

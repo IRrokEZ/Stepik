@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1707485595 source:d:\git\stepik\names_surenames_3\main.cpp
+	<iostream>
+	<vector>
+	<algorithm>
+	<string>
+	<map>
+
