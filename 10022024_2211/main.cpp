@@ -120,10 +120,23 @@ ostream& operator<< (ostream& stream, const Rational& rational) {
 
 istream& operator>> (istream& stream, Rational& rational) {
     string inp;
+    if ((stream.fail()) || (stream.bad())) {
+        return stream;
+    }
+    if (!getline(stream, inp)) {
+        return stream;
+    }
     stream >> inp;
     if (inp == "") {
         return stream;
     }
+    string new_str = "";
+    for (const char& c : inp) {
+        if(c != ' ') {
+            new_str += c;
+        }
+    }
+    inp = new_str;
     int sl_count = 0;
     for (const auto& sym : inp) {
         if (!(((sym >= '0') && (sym <= '9')) || (sym == '/'))) {
