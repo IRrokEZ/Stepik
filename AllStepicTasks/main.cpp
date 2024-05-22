@@ -1181,6 +1181,21 @@ void WorjWithStudent () {
     }
 }
 
+void EnsureEqual(const std::string& left, const std::string& right) {
+    if (left != right) {
+        throw std::runtime_error(left + " != " + right);
+    }
+}
+
+void TryExceptions () {
+    try {
+        EnsureEqual("C++ White", "C++ White");
+        EnsureEqual("C++ White", "C++ Yellow");
+    } catch (std::runtime_error& e) {
+        std::cout << e.what() << std::endl;
+    }
+}
+
 class Rational {
 public:
     Rational () {
@@ -1190,6 +1205,9 @@ public:
     Rational (int numerator, int denominator) {
         numerator_value = numerator;
         denominator_value = denominator;
+        if (denominator == 0) {
+            throw std::invalid_argument("Division by zero");
+        }
         if (numerator_value == 0) {
             denominator_value = 1;
         } else {
@@ -1232,7 +1250,7 @@ private:
     int numerator_value, denominator_value;
 };
 
-bool operator== (const Rational& left_arg, const Rational& right_arg) {
+bool operator==  (const Rational& left_arg, const Rational& right_arg) {
     if ((left_arg.Numerator() == right_arg.Numerator()) &&
         (left_arg.Denominator() == right_arg.Denominator())) {
         return true;
@@ -1240,7 +1258,7 @@ bool operator== (const Rational& left_arg, const Rational& right_arg) {
     return false;
 }
 
-bool operator> (const Rational& left_arg, const Rational& right_arg) {
+bool operator>  (const Rational& left_arg, const Rational& right_arg) {
     if ((left_arg.Numerator() * right_arg.Denominator()) >
         (left_arg.Denominator() * right_arg.Numerator())) {
         return true;
@@ -1248,7 +1266,7 @@ bool operator> (const Rational& left_arg, const Rational& right_arg) {
     return false;
 }
 
-bool operator< (const Rational& left_arg, const Rational& right_arg) {
+bool operator<  (const Rational& left_arg, const Rational& right_arg) {
     if ((left_arg.Numerator() * right_arg.Denominator()) <
         (left_arg.Denominator() * right_arg.Numerator())) {
         return true;
@@ -1280,6 +1298,9 @@ Rational operator* (const Rational& left_arg, const Rational& right_arg) {
 }
 
 Rational operator/ (const Rational& left_arg, const Rational& right_arg) {
+    if (right_arg.Numerator() == 0) {
+        throw std::domain_error("Division by zero");
+    }
     int new_numerator = left_arg.Numerator() * right_arg.Denominator();
     int new_denominator = left_arg.Denominator() * right_arg.Numerator();
     Rational result(new_numerator, new_denominator);
@@ -1292,24 +1313,14 @@ std::ostream& operator<< (std::ostream& stream, const Rational& rational) {
 }
 
 std::istream& operator>> (std::istream& stream, Rational& rational) {
+    if (!stream) {
+        return stream;
+    }
     std::string inp;
-    if ((stream.fail()) || (stream.bad())) {
-        return stream;
-    }
-    if (!getline(stream, inp)) {
-        return stream;
-    }
     stream >> inp;
     if (inp == "") {
         return stream;
     }
-    std::string new_str = "";
-    for (const char& c : inp) {
-        if(c != ' ') {
-            new_str += c;
-        }
-    }
-    inp = new_str;
     int sl_count = 0;
     for (const auto& sym : inp) {
         if (!(((sym >= '0') && (sym <= '9')) || (sym == '/'))) {
@@ -1336,6 +1347,80 @@ std::istream& operator>> (std::istream& stream, Rational& rational) {
     rational.SetNumerator(num);
     rational.SetDenominator(den);
     return stream;
+}
+
+Rational Calculator (std::string& stream) {
+    std::string inp = "", incorr_inp = stream;
+    if (incorr_inp == "") {
+        throw std::invalid_argument("Invalid argument");
+    }
+    for (const char& s : incorr_inp) {
+        if (s != ' ') {
+            inp += s;
+        }
+    }
+    int sl_count = 0, oper_count = 0, sym_count = 0;
+    for (const char& sym : inp) {
+        if ((sym == '+') ||
+            (sym == '-') ||
+            (sym == '*')) {
+            ++ oper_count;
+        }
+        if (sym == '/') {
+            ++ sl_count;
+        }
+        if ((sym >= '0') && (sym <= '9')) {
+            ++ sym_count;
+        }
+    }
+    if ((sl_count < 2) ||
+        (sl_count > 3) ||
+        ((sl_count == 2) && (oper_count < 1)) ||
+        (oper_count > 1)) {
+        throw std::invalid_argument("Invalid argument");
+    }
+    if (size_t(sl_count + oper_count + sym_count) != inp.size()) {
+        throw std::invalid_argument("Invalid argument");
+    }
+    std::istringstream ready_to_parce(inp);
+    int l_num, l_den, r_num, r_den;
+    char oper;
+    ready_to_parce >> l_num;
+    ready_to_parce.ignore(1);
+    ready_to_parce >> l_den;
+    ready_to_parce >> oper;
+    ready_to_parce >> r_num;
+    ready_to_parce.ignore(1);
+    ready_to_parce >> r_den;
+    if ((l_den == 0) || (r_den == 0)) {
+        throw std::invalid_argument("Invalid argument");
+    }
+    if (oper == '/') {
+        if (r_num == 0) {
+            throw std::domain_error("Division by zero");
+        }
+    }
+    if (oper == '+') {
+        Rational left_arg(l_num, l_den);
+        Rational right_arg(r_num, r_den);
+        return left_arg + right_arg;
+    }
+    if (oper == '-') {
+        Rational left_arg(l_num, l_den);
+        Rational right_arg(r_num, r_den);
+        return left_arg - right_arg;
+    }
+    if (oper == '*') {
+        Rational left_arg(l_num, l_den);
+        Rational right_arg(r_num, r_den);
+        return left_arg * right_arg;
+    }
+    if (oper == '/') {
+        Rational left_arg(l_num, l_den);
+        Rational right_arg(r_num, r_den);
+        return left_arg / right_arg;
+    }
+    return Rational(0, 1);
 }
 
 int main()

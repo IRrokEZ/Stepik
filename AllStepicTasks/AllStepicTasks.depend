@@ -1,10 +1,13 @@
 # depslib dependency file v1.0
-1716409507 source:d:\git\stepik\allstepictasks\main.cpp
+1716410787 source:d:\git\stepik\allstepictasks\main.cpp
 	<algorithm>
 	<cmath>
+	<fstream>
+	<iomanip>
 	<iostream>
 	<map>
 	<set>
+	<sstream>
 	<string>
 	<vector>
 	<utility>
