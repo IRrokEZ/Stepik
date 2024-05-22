@@ -1,0 +1,19 @@
+# depslib dependency file v1.0
+1716409507 source:d:\git\stepik\allstepictasks\main.cpp
+	<algorithm>
+	<cmath>
+	<iostream>
+	<map>
+	<set>
+	<string>
+	<vector>
+	<utility>
+	"function.hpp"
+
+1716409569 d:\git\stepik\allstepictasks\function.hpp
+	<algorithm>
+	<vector>
+
+1716409552 source:d:\git\stepik\allstepictasks\function.cpp
+	"function.hpp"
+

@@ -1,8 +1,0 @@
-# depslib dependency file v1.0
-1707591148 source:d:\git\stepik\10022024_1831\main.cpp
-	<iostream>
-	<fstream>
-	<string>
-	<vector>
-	<iomanip>
-
